@@ -2,7 +2,7 @@
 <%@ import namespace="EPiServer.Web.Mvc.Html" %>
 <%@ import namespace="EPiServer.Forms" %>
 <%@ import namespace="EPiServer.Forms.Core.Models" %>
-<%@ import namespace="EPiServer.Forms.Helpers" %>
+<%@ import namespace="EPiServer.Forms.Helpers.Internal" %>
 <%@ import namespace="EPiServer.Forms.Implementation.Elements" %>
 <%@ control language="C#" inherits="ViewUserControl<NumberElementBlock>" %>
 

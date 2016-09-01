@@ -1,7 +1,7 @@
 ﻿<%@ import namespace="System.Web.Mvc" %>
 <%@ import namespace="EPiServer.Web.Mvc.Html" %>
 <%@ import namespace="EPiServer.Forms.Core.Models" %>
-<%@ import namespace="EPiServer.Forms.Helpers" %>
+<%@ import namespace="EPiServer.Forms.Helpers.Internal" %>
 <%@ import namespace="EPiServer.Forms.Implementation.Elements" %>
 <%@ control language="C#" inherits="ViewUserControl<ChoiceElementBlock>" %>
 
@@ -23,14 +23,16 @@
         {
             var defaultCheckedString = Model.GetDefaultSelectedString(item);
             var checkedString = string.IsNullOrEmpty(defaultCheckedString) ? string.Empty : "checked";
-        %>
-        <label>
-            <% if(Model.AllowMultiSelect) { %>
-            <input type="checkbox"  name="<%: formElement.ElementName %>" value="<%: item.Value %>" class="FormChoice__Input FormChoice__Input--Checkbox" <%: checkedString %>   <%: defaultCheckedString %> />
-            <% } else  { %>
-            <input type="radio"     name="<%: formElement.ElementName %>" value="<%: item.Value %>" class="FormChoice__Input FormChoice__Input--Radio"    <%: checkedString %>   <%: defaultCheckedString %> />
-            <% } %>
-            <%: item.Caption %></label>
+    %>
+
+    <label>
+        <% if(Model.AllowMultiSelect) { %>
+        <input type="checkbox"  name="<%: formElement.ElementName %>" value="<%: item.Value %>" class="FormChoice__Input FormChoice__Input--Checkbox" <%: checkedString %>   <%: defaultCheckedString %> />
+        <% } else  { %>
+        <input type="radio"     name="<%: formElement.ElementName %>" value="<%: item.Value %>" class="FormChoice__Input FormChoice__Input--Radio"    <%: checkedString %>   <%: defaultCheckedString %> />
+        <% } %>
+        <%: item.Caption %></label>
+
     <% } %>
     <span data-epiforms-linked-name="<%: formElement.ElementName %>" class="Form__Element__ValidationError" style="display: none;">*</span>
     </div>

@@ -5,15 +5,19 @@
 <%@ Import Namespace="EPiServer.Forms.Configuration" %>
 <%@ import namespace="EPiServer.Forms.Core" %>
 <%@ import namespace="EPiServer.Forms.Core.Models" %>
-<%@ import namespace="EPiServer.Forms.Helpers" %>
+<%@ import namespace="EPiServer.Forms.Helpers.Internal" %>
+<%@ import namespace="EPiServer.Forms.EditView.Internal" %>
 <%@ import namespace="EPiServer.Forms.Implementation.Elements" %>
 <%@ import namespace="EPiServer.Forms.Implementation.Elements.BaseClasses" %>
 <%@ control language="C#" inherits="ViewUserControl<FormContainerBlock>" %>
 
+<%  
+    var _formConfig = EPiServer.ServiceLocation.ServiceLocator.Current.GetInstance<EPiServer.Forms.Configuration.IEPiServerFormsImplementationConfig>();
+%>
 
 
 <% if (EPiServer.Editor.PageEditing.PageIsInEditMode) { %>
-<link rel="stylesheet" type="text/css" data-epiforms-resource="EPiServerForms.css" href='<%: ModuleHelper.ToClientResource(typeof(ModuleHelper), "ClientResources/ViewMode/EPiServerForms.css")%>' />
+<link rel="stylesheet" type="text/css" data-epiforms-resource="EPiServerForms.css" href='<%: ModuleHelper.ToClientResource(typeof(FormsModule), "ClientResources/ViewMode/EPiServerForms.css")%>' />
     <% if (Model.Form != null) { %>
 <div class="EPiServerForms">
     <h2 class="Form__Title"><%: Html.PropertyFor(m => m.Title) %></h2>
@@ -37,10 +41,11 @@
     var validationFailCssClass = ViewBag.ValidationFail ? "ValidationFail" : string.Empty;
 %>
 <%--Form will post to its own page Controller --%>
+
 <form method="post" 
     enctype="multipart/form-data" class="EPiServerForms form-horizontal <%: validationFailCssClass %>" data-epiforms-type="form" id="<%: Model.Form.FormGuid %>">
     <%--Meta data, authoring data of this form is transfer to clientside here. We need to take form with language coresponse with current page's language --%>
-    <script type="text/javascript" src="<%: EPiServerFormsSection.Instance.CoreController %>/GetFormInitScript?formGuid=<%: Model.Form.FormGuid %>&formLanguage=<%: FormsExtensions.GetCurrentPageLanguage() %>"></script>
+    <script type="text/javascript" src="<%: _formConfig.CoreController %>/GetFormInitScript?formGuid=<%: Model.Form.FormGuid %>&formLanguage=<%: FormsExtensions.GetCurrentPageLanguage() %>"></script>
 
     <%--Meta data, send along as a SYSTEM information about this form, so this can work without JS --%>
     <input type="hidden" class="Form__Element Form__SystemElement FormHidden FormHideInSummarized" name="__FormGuid"                value="<%: Model.Form.FormGuid %>" />
@@ -48,9 +53,14 @@
     <input type="hidden" class="Form__Element Form__SystemElement FormHidden FormHideInSummarized" name="__FormLanguage"            value="<%: FormsExtensions.GetCurrentPageLanguage() %>" />
     <input type="hidden" class="Form__Element Form__SystemElement FormHidden FormHideInSummarized" name="__FormCurrentStepIndex"    value="<%: ViewBag.CurrentStepIndex ?? "" %>" />
     <input type="hidden" class="Form__Element Form__SystemElement FormHidden FormHideInSummarized" name="__FormSubmissionId"        value="<%: ViewBag.FormSubmissionId %>" />
-
-    <h2 class="Form__Title"><%: Model.Title %></h2>
-    <aside class="Form__Description"><%: Model.Description %></aside>
+    
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-10">
+                <h2 class="Form__Title"><%: Model.Title %></h2>
+                <aside class="Form__Description"><%: Model.Description %></aside>
+            </div>
+    </div>
 
     <%  var statusDisplay = "hide";
         var message = ViewBag.Message;
@@ -62,18 +72,36 @@
             statusDisplay = "Form__Warning__Message";
         } 
     %>
+    <%
+       if (ViewBag.IsReadOnlyMode)
+       {
+        %>
+            <div class="Form__Status">
+                <span class="Form__Readonly__Message">
+                    <%: Html.Translate("/episerver/forms/viewmode/readonlymode")%>
+                </span>
+            </div>
+        <% 
+       }
+    %>
 
     <%-- area for showing Form's status or validation --%>
-    <div class="Form__Status">
-        <span class="Form__Status__Message <%: statusDisplay %> alert">
-            <% if (ViewBag.FormFinalized) { %>
-                <%= message %>
-            <% } else { %>
-                <%: message %>
-            <% } %>
-        </span>
-    </div>
 
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="Form__Status col-md-10">
+            <span class="Form__Status__Message <%: statusDisplay %> alert">
+                <% if (ViewBag.FormFinalized)
+                    { %>
+                <%= message %>
+                <% }
+                else
+                { %>
+                <%: message %>
+                <% } %>
+            </span>
+        </div>
+    </div>
 
     <div class="Form__MainBody">
         <%  var i = 0;
@@ -105,26 +133,28 @@
                 string nextButtonDisableState = (currentStepIndex == currentDisplayStepCount - 1) || !ViewBag.Submittable ? "disabled" : "";
         %>
         <% if (Model.ShowNavigationBar) { %>
-        <nav role="navigation" class="Form__NavigationBar row">
-            <div class="col-sm-3"></div>
-            <div class="col-sm-9">
-            <button type="submit" name="submit" value="<%: SubmitButtonType.PreviousStep.ToString() %>" class="Form__NavigationBar__Action FormExcludeDataRebind btnPrev btn btn-secondary" <%: prevButtonDisableState %> ><%: Html.Translate("/episerver/forms/viewmode/stepnavigation/previous")%></button>
+        <div class="row">
+            <nav role="navigation" class="Form__NavigationBar row">
+                <div class="col-sm-3"></div>
+                <div class="col-sm-9">
+                    <button type="submit" name="submit" value="<%: SubmitButtonType.PreviousStep.ToString() %>" class="Form__NavigationBar__Action FormExcludeDataRebind btnPrev btn btn-secondary" <%: prevButtonDisableState %>><%: Html.Translate("/episerver/forms/viewmode/stepnavigation/previous")%></button>
 
-            <%
-            // calculate the progress style on-server-side
-            var currentDisplayStepIndex = currentStepIndex + 1;
-            var progressWidth = (100 * currentDisplayStepIndex / currentDisplayStepCount) + "%";
-            %>
-            <div class="Form__NavigationBar__ProgressBar">
-                <div class="Form__NavigationBar__ProgressBar--Progress" style="width: <%: progressWidth %> "></div>
-                <div class="Form__NavigationBar__ProgressBar--Text">
-                    <span class="Form__NavigationBar__ProgressBar__ProgressLabel"><%: Html.Translate("/episerver/forms/viewmode/stepnavigation/page")%></span> <span class="Form__NavigationBar__ProgressBar__CurrentStep"><%:currentDisplayStepIndex %></span>/<span class="Form__NavigationBar__ProgressBar__StepsCount"><%:currentDisplayStepCount %></span>
+                    <%
+                        // calculate the progress style on-server-side
+                        var currentDisplayStepIndex = currentStepIndex + 1;
+                        var progressWidth = (100 * currentDisplayStepIndex / currentDisplayStepCount) + "%";
+                    %>
+                    <div class="Form__NavigationBar__ProgressBar">
+                        <div class="Form__NavigationBar__ProgressBar--Progress" style="width: <%: progressWidth %>"></div>
+                        <div class="Form__NavigationBar__ProgressBar--Text">
+                            <span class="Form__NavigationBar__ProgressBar__ProgressLabel"><%: Html.Translate("/episerver/forms/viewmode/stepnavigation/page")%></span> <span class="Form__NavigationBar__ProgressBar__CurrentStep"><%:currentDisplayStepIndex %></span>/<span class="Form__NavigationBar__ProgressBar__StepsCount"><%:currentDisplayStepCount %></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" name="submit" value="<%: SubmitButtonType.NextStep.ToString() %>" class="Form__NavigationBar__Action FormExcludeDataRebind btnNext btn btn-secondary" <%: nextButtonDisableState %>><%: Html.Translate("/episerver/forms/viewmode/stepnavigation/next")%></button>
                 </div>
-            </div>
-
-            <button type="submit" name="submit" value="<%: SubmitButtonType.NextStep.ToString() %>" class="Form__NavigationBar__Action FormExcludeDataRebind btnNext btn btn-secondary" <%: nextButtonDisableState %>><%: Html.Translate("/episerver/forms/viewmode/stepnavigation/next")%></button>
-            </div>
-        </nav>
+            </nav>
+        </div>
         <% } %>
 
         <% } // endof if %>
@@ -141,5 +171,6 @@
     width: auto;
     max-width: 100%;
 }
+
 </style>
 <% } %>

@@ -1,40 +1,39 @@
-﻿@using System.Web.Mvc
-@using EPiServer.Core
-@using EPiServer.Web.Mvc.Html
-@using EPiServer.Forms.Core
-@using EPiServer.Forms.Core.Models
-@using EPiServer.Forms.Helpers
-@using EPiServer.Forms.Implementation.Elements
+﻿<%@ Import Namespace="System.Web.Mvc" %>
+<%@ Import Namespace="EPiServer.Core" %>
+<%@ Import Namespace="EPiServer.Web.Mvc.Html" %>
+<%@ Import Namespace="EPiServer.Forms.Core" %>
+<%@ Import Namespace="EPiServer.Forms.Core.Models" %>
+<%@ Import Namespace="EPiServer.Forms.Helpers.Internal" %>
+<%@ Import Namespace="EPiServer.Forms.Implementation.Elements" %>
 
-@model ParagraphTextElementBlock
+<%@ Control Language="C#" Inherits="ViewUserControl<ParagraphTextElementBlock>" %>
 
-@{
+<%
     var formElement = Model.FormElement;
     var paragraphText = Model.ParagraphText;
     var originalParagraphText = Model.OriginalParagraphText;
-}
-
+%>
 <div class="form-group row">
 <label class="col-sm-3 control-label">@Html.Raw(Model.Content.Name)</label>
 <div class="col-sm-9">
-<div class="Form__Element FormParagraphText Form__Element--NonData" data-epiforms-element-name="@formElement.ElementName">
-    @if (EPiServer.Editor.PageEditing.PageIsInEditMode)
-    {
-        <div name="@formElement.ElementName" id="@formElement.Guid" @Html.Raw(Model.AttributesString)>@Html.Raw(Model.EditViewFriendlyTitle)</div>
-    }
+<div class="Form__Element FormParagraphText Form__Element--NonData" data-epiforms-element-name="<%: formElement.ElementName %>">
+    <% if (EPiServer.Editor.PageEditing.PageIsInEditMode)
+    { %>
+        <div name="<%: formElement.ElementName %>" id="<%: formElement.Guid %>" <%: Html.Raw(Model.AttributesString) %>><%: Html.Raw(Model.EditViewFriendlyTitle) %></div>
+    <% }
     else
-    {
-        <div name="@formElement.ElementName" id="@formElement.Guid" @Html.Raw(Model.AttributesString)>@Html.Raw(paragraphText)</div>
+    {  %>
+        <div name="<%: formElement.ElementName %>" id="<%: formElement.Guid %>" <%: Html.Raw(Model.AttributesString) %>><%: Html.Raw(paragraphText) %></div>
         <script type="text/javascript">
             if (typeof $$epiforms !== 'undefined') {
-                $$epiforms(document).ready(function() {
-                    $$epiforms(".EPiServerForms").on("formsNavigationNextStep formsSetupCompleted", function(event) {
-                        (function($) {
-                            var text = @Html.Raw(originalParagraphText),
+                $$epiforms(document).ready(function () {
+                    $$epiforms(".EPiServerForms").on("formsNavigationNextStep formsSetupCompleted", function (event) {
+                        (function ($) {
+                            var text = <%: Html.Raw(originalParagraphText) %>,
                                 workingFormInfo = event.workingFormInfo,
                                 searchPattern = null,
                                 $workingForm = workingFormInfo.$workingForm,
-                                $currentElement = $("#@formElement.Guid", $workingForm);
+                                $currentElement = $("#<%: formElement.Guid %>", $workingForm);
 
                             // if cannot find the element in form, do nothing
                             if (!$currentElement || $currentElement.length == 0) {
@@ -54,8 +53,8 @@
                                 }
                                 var value = elementInfo && elementInfo.customBinding == true ?
                                     epi.EPiServer.Forms.CustomBindingElements[elementInfo.type](elementInfo, data[fieldName])
-                                    : data[fieldName];
-                                if (value == null || value === undefined) {
+                                    :data[fieldName];
+                                if(value == null || value === undefined) {
                                     value = "";
                                 }
 
@@ -70,7 +69,7 @@
                 });
             }
         </script>
-    }
+    <% } %>
 </div>
 </div>
 </div>

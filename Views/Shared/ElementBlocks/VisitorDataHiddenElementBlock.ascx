@@ -3,13 +3,14 @@
 <%@ Import Namespace="EPiServer.Web.Mvc.Html" %>
 <%@ Import Namespace="EPiServer.Forms" %>
 <%@ Import Namespace="EPiServer.Forms.Core" %>
+<%@ Import Namespace="EPiServer.Forms.EditView" %>
 <%@ Import Namespace="EPiServer.Forms.Core.Models" %>
 <%@ Import Namespace="EPiServer.Forms.Implementation.Elements" %>
 <%@ Control Language="C#" Inherits="ViewUserControl<VisitorDataHiddenElementBlock>" %>
 
 <% 
     var isViewModeInvisibleElement = Model is IViewModeInvisibleElement;
-    var extraCSSClass = isViewModeInvisibleElement ? Constants.CSS_InvisibleElement : string.Empty;
+    var extraCSSClass = isViewModeInvisibleElement ? ConstantsFormsUI.CSS_InvisibleElement : string.Empty;
     var formElement = Model.FormElement;
     
     if (EPiServer.Editor.PageEditing.PageIsInEditMode) { %>
