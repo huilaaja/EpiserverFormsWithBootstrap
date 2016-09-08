@@ -14,7 +14,7 @@
     var originalParagraphText = Model.OriginalParagraphText;
 %>
 <div class="form-group row">
-<label class="col-sm-3 control-label">@Html.Raw(Model.Content.Name)</label>
+<label class="col-sm-3 control-label"><%: Html.Raw(Model.Content.Name) %></label>
 <div class="col-sm-9">
 <div class="Form__Element FormParagraphText Form__Element--NonData" data-epiforms-element-name="<%: formElement.ElementName %>">
     <% if (EPiServer.Editor.PageEditing.PageIsInEditMode)
